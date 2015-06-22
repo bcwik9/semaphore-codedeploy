@@ -34,7 +34,7 @@ class HookController < ApplicationController
 
     # process the file so there's no top level folder
     # first, unzip and remove old file
-    s3_bucket_name = File.basename(tar_filename, '.*')
+    s3_bucket_name = "#{project}_temp_codedeploy_files"
     FileUtils.mkdir_p s3_bucket_name
     system "tar -xf #{tar_filename} -C #{s3_bucket_name}"
     FileUtils.rm_f tar_filename
