@@ -18,7 +18,7 @@ class HookController < ApplicationController
 
     # download tar file from git
     git_token = ENV['GITHUB_CODEDEPLOY_TOKEN'] # used for private repos
-    tar_filename = File.join Dir.pwd, "bustr_bcwik_aws.tar"
+    tar_filename = File.join Dir.pwd, "#{project}_#{branch}.tar"
     download_cmd = "wget https://api.github.com/repos/#{project_location}/tarball/#{commit_sha} -O #{tar_filename}"
     unless git_token.nil? or git_token.empty?
       # add authentication for private git repos if necessary
