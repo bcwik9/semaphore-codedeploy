@@ -18,7 +18,7 @@ class HookController < ApplicationController
 
     # download tar file from git
     git_token = ENV['GITHUB_CODEDEPLOY_TOKEN'] # used for private repos
-    tar_filename = "#{project}_#{branch}.tar"
+    tar_filename = File.join Dir.pwd, "bustr_bcwik_aws.tar"
     download_cmd = "wget https://api.github.com/repos/#{project_location}/tarball/#{commit_sha} -O #{tar_filename}"
     unless git_token.nil? or git_token.empty?
       # add authentication for private git repos if necessary
@@ -47,9 +47,8 @@ class HookController < ApplicationController
     FileUtils.rm_rf s3_bucket_name
 
     # push downloaded file to AWS S3
-    s3_bucket_name = tar_filename.gsub('.tar', '')
-    Aws::S3::Client.new.create_bucket(acl: "private", bucket: s3_bucket_name)
-    s3_file_obj = Aws::S3::Resource.new.bucket(s3_bucket_name).object(tar_filename)
+    Aws::S3::Client.new.create_bucket(acl: "authenticated-read", bucket: s3_bucket_name)
+    s3_file_obj = Aws::S3::Resource.new.bucket(s3_bucket_name).object(File.basename(tar_filename))
     s3_file_obj.upload_file tar_filename
     # clean up
     FileUtils.rm_f tar_filename
@@ -65,7 +64,7 @@ class HookController < ApplicationController
                                           revision_type: "S3",
                                           s3_location: {
                                             bucket: s3_bucket_name,
-                                            key: s3_bucket_name,
+                                            key: File.basename(tar_filename),
                                             bundle_type: "tar"
                                           }
                                         }
