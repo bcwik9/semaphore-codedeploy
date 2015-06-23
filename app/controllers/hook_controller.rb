@@ -16,6 +16,11 @@ class HookController < ApplicationController
       return
     end
 
+    # only deploy if the codedeploy deploy group exists
+    # will throw an exception if it doesn't exist
+    codedeploy_client = Aws::CodeDeploy::Client.new
+    codedeploy_client.get_deployment_group(application_name: project, deployment_group_name: branch)
+
     # download tar file from git
     git_token = ENV['GITHUB_CODEDEPLOY_TOKEN'] # used for private repos
     tar_filename = File.join Dir.pwd, "#{project}_#{branch}.tar"
@@ -54,7 +59,6 @@ class HookController < ApplicationController
     FileUtils.rm_f tar_filename
 
     # deploy
-    codedeploy_client = Aws::CodeDeploy::Client.new
     codedeploy_client.create_deployment(
                                         application_name: project,
                                         deployment_group_name: branch,
